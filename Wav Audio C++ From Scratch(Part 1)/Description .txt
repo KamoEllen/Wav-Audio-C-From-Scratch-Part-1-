@@ -1,0 +1,119 @@
+Description 
+
+ChunkSize = 36 + SubChunk2 Size
+ChunkSize = 36 + SubChunk2 Size
+Format = WAZE
+
+SubChunk1 ID =fmt
+SubChunk1 Size = 16
+AudioFormat = 1
+NumChannels = 1 or 2
+SampleRate = 44100
+ByteRate = SampleRate * NumberChannels * BitsPerSample/8
+BlockAlign =NumberChannels * BitsPerSample/8
+BitsPerSample = 16
+
+Subchunk2ID = data
+Subchunk2 Size = NumSamples * NumChannels * BitsPerSample/8
+Data = The actual sound data
+
+(with comments)
+#include <iostream>
+#include<fstream>
+#include<cmath>
+using namespace std;
+
+//Riff Chunk
+const string chunk_id = "RIFF";
+const string chunk_size = "----"; //4bytes
+const string format = "WAVE";
+
+//FMT sub-chunk 
+const string chunk1_id = "fmt "; //4 bytes req = space added
+const int subchunk1_size = 16;
+const int audio_format = 1;
+const int num_channels = 2;
+const int sample_rate = 44100;
+const int byte_rate = sample_rate * num_channels * (subchunk1_size/8);
+const int bits_per_sample = 16;
+
+//Data sub-chunk
+const string subchunk2_id= "data";
+const string subchunk2_size = "----";
+
+const int duration = 2;
+const int max_amplitude = 32760; //2^16 = 65536 / 2 = 32768 - 1 = 32767 
+const double frequency = 250;
+
+//audio format = 2bytes. Cast used.
+//casting ex + use
+//int x = 0;
+//double y = 3.5;
+//double z = (double)x + y;
+
+//ofstream as a write function. View as binary. View the int as const char
+void write_as_bytes(ofstream &file, int value, int byte_size)
+{
+    file.write(reinterpret_cast<const char*>(&value), byte_size);
+    }
+
+int main()
+ {
+
+    ofstream wav;
+    wav.open("test.wav" , ios:: binary);
+
+    if(wav.is_open)
+ }
+    {
+    wav << chunk_id;
+    wav << chunk_size;
+    wav << format ;
+
+    wav << subchunks1_id;
+    write_as_bytes(wav, subchunk1_size,4);
+    write_as_bytes(wav,audio_format,2);
+    write_as_bytes(wav,num_channels,2);
+    write_as_bytes(wav,sample_rate,4);
+    write_as_bytes(wav,byte_rate,4);
+    write_as_bytes(wav,block_align,2);
+    write_as_bytes(wav,bits_per_sample,2);
+
+    wav << subchunk2_id;
+    wav << subchunk2_size;
+
+    int start_audio = wav.tellp(); //ofstream function
+    //i increases.
+    for( int i =0; i < sample_rate * duration; i ++) 
+        {
+            double amplitude = (double)i / sample_rate *max_amplitude; 
+            double value = sin((2 * 3.14 * i * frequency) / sample_rate); //y=a*sin⁡(bx)
+
+            //sound increases L side
+            double channel1 = amplitude * value / 2;
+            //sound decrease R pan
+            double channel2 = (max_amplitude - ampliude) * value;
+
+            write_as_bytes(wav , channel1, 2);
+            write_as_bytes(wav, channel2 , 2);
+
+            int end_audio = wav.tellp();
+
+            wav.seekp(start_audio - 4);
+            write_as_bytes(wav, end_audio - start_audio, 4); // length 
+
+            wav.seek(4, ios::beg);
+            write_as_bytes(wav, end_audio - 8 , 4);
+
+        }
+wav.close();
+return 0;
+}
+
+
+
+
+
+
+
+
